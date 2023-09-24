@@ -8,9 +8,9 @@ private:
 	long lBlockX;//在用户界面坐标
 	long lBlockY;//在用户界面坐标
 	unsigned long ulRotation;//Rotation属性 Rotate动词
-	unsigned long ulRotCount;//旋转形态数
-	unsigned long ulSideLength;//边长
-	unsigned long ulSquareArea;//面积
+	unsigned long ulRotationForm;//旋转形态数
+	unsigned long ulSide;//边长
+	unsigned long ulArea;//面积
 	const bool *bArrCurBlock;//当前块的基地址
 	const bool *bArrBlock;//所有块基地址
 	bool bNew;
@@ -19,10 +19,10 @@ public:
 	Block(bool(&bArrBlock)[Size][Side][Side]) :Block((bool *)bArrBlock, Side, Size)//委托构造
 	{}
 
-	Block(bool *_bArrBlock = nullptr, unsigned long _ulSideLength = 0, unsigned long _ulRotCount = 0, bool _bNew = true) :
-		lBlockX(0), lBlockY(0), ulRotation(0), ulRotCount(0), ulSideLength(0), ulSquareArea(0), bArrCurBlock(nullptr), bArrBlock(nullptr), bNew(false)
+	Block(bool *_bArrBlock = nullptr, unsigned long _ulSide = 0, unsigned long _ulRotationForm = 0, bool _bNew = true) :
+		lBlockX(0), lBlockY(0), ulRotation(0), ulRotationForm(0), ulSide(0), ulArea(0), bArrCurBlock(nullptr), bArrBlock(nullptr), bNew(false)
 	{
-		SetBlock(_bArrBlock, _ulSideLength, _ulRotCount, _bNew);
+		SetBlock(_bArrBlock, _ulSide, _ulRotationForm, _bNew);
 	}
 
 	Block(const Block &_Copy)
@@ -44,7 +44,7 @@ public:
 	Block &operator=(const Block &_Copy)
 	{
 		//进行赋值和清理（如果bArrBlock不为nullptr）
-		SetBlock(_Copy.bArrBlock, _Copy.ulSideLength, _Copy.ulRotCount, true);
+		SetBlock(_Copy.bArrBlock, _Copy.ulSide, _Copy.ulRotationForm, true);
 		//拷贝剩余成员
 		lBlockX = _Copy.lBlockX;
 		lBlockY = _Copy.lBlockY;
@@ -56,9 +56,9 @@ public:
 		lBlockX = _Move.lBlockX;
 		lBlockY = _Move.lBlockY;
 		ulRotation = _Move.ulRotation;
-		ulRotCount = _Move.ulRotCount;
-		ulSideLength = _Move.ulSideLength;
-		ulSquareArea = _Move.ulSquareArea;
+		ulRotationForm = _Move.ulRotationForm;
+		ulSide = _Move.ulSide;
+		ulArea = _Move.ulArea;
 		bArrCurBlock = _Move.bArrCurBlock;
 		bArrBlock = _Move.bArrBlock;
 		bNew = _Move.bNew;
@@ -66,12 +66,14 @@ public:
 		_Move.lBlockX = 0;
 		_Move.lBlockY = 0;
 		_Move.ulRotation = 0;
-		_Move.ulRotCount = 0;
-		_Move.ulSideLength = 0;
-		_Move.ulSquareArea = 0;
+		_Move.ulRotationForm = 0;
+		_Move.ulSide = 0;
+		_Move.ulArea = 0;
 		_Move.bArrCurBlock = nullptr;
 		_Move.bArrBlock = nullptr;//设置nullptr防止被后续析构函数调用清理
 		_Move.bNew = false;
+
+		return *this;
 	}
 
 	void FreeBlock(void)
@@ -81,9 +83,9 @@ public:
 			lBlockX = 0;
 			lBlockY = 0;
 			ulRotation = 0;
-			ulRotCount = 0;
-			ulSideLength = 0;
-			ulSquareArea = 0;
+			ulRotationForm = 0;
+			ulSide = 0;
+			ulArea = 0;
 
 			if (bNew)//如果是new出来的才释放，否则直接放弃该内存块
 			{
@@ -93,7 +95,7 @@ public:
 		}
 	}
 
-	void SetBlock(const bool *_bArrBlock, unsigned long _ulSideLength, unsigned long _ulRotCount, bool _bNew = true)
+	void SetBlock(const bool *_bArrBlock, unsigned long _ulSide, unsigned long _ulRotationForm, bool _bNew = true)
 	{
 		if (_bArrBlock == nullptr)
 		{
@@ -104,7 +106,7 @@ public:
 
 		if (_bNew)
 		{
-			unsigned long ulBlockArrLength = (_ulSideLength * _ulSideLength) * _ulRotCount;//边长乘边长是一个方块大小，再乘以方块个数算出总内存
+			unsigned long ulBlockArrLength = (_ulSide * _ulSide) * _ulRotationForm;//边长乘边长是一个方块大小，再乘以方块个数算出总内存
 			if (ulBlockArrLength == 0)
 			{
 				return;
@@ -122,9 +124,9 @@ public:
 		//成员赋值
 		bArrBlock = bArrNew;
 		bArrCurBlock = bArrNew;
-		ulSquareArea = _ulSideLength * _ulSideLength;
-		ulSideLength = _ulSideLength;
-		ulRotCount = _ulRotCount;
+		ulArea = _ulSide * _ulSide;
+		ulSide = _ulSide;
+		ulRotationForm = _ulRotationForm;
 		bNew = _bNew;
 	}
 
@@ -154,31 +156,31 @@ public:
 		return lBlockY;
 	}
 
-	unsigned long GetRotCount(void)
+	unsigned long GetRotCount(void) const
 	{
-		return ulRotCount;
+		return ulRotationForm;
 	}
 
-	unsigned long GetSideLength(void)
+	unsigned long GetSide(void) const
 	{
-		return ulSideLength;
+		return ulSide;
 	}
 
-	unsigned long GetSquareArea(void)
+	unsigned long GetArea(void) const
 	{
-		return ulSquareArea;
+		return ulArea;
 	}
 
 	void Rotate(long lRotate)//正右反左
 	{
-		ulRotation = (ulRotation + lRotate) % ulRotCount;//切换旋转形态
-		bArrCurBlock = &bArrBlock[ulSquareArea * ulRotation];//旋转方向*面积求出对应矩形基地址
+		ulRotation = (ulRotation + lRotate) % ulRotationForm;//切换旋转形态
+		bArrCurBlock = &bArrBlock[ulArea * ulRotation];//旋转方向*面积求出对应矩形基地址
 	}
 
 	void SetRotation(unsigned long _ulRotation)
 	{
-		ulRotation = _ulRotation % ulRotCount;
-		bArrCurBlock = &bArrBlock[ulSquareArea * ulRotation];//旋转方向*面积求出对应矩形基地址
+		ulRotation = _ulRotation % ulRotationForm;
+		bArrCurBlock = &bArrBlock[ulArea * ulRotation];//旋转方向*面积求出对应矩形基地址
 	}
 
 	long GetRotation(void) const
@@ -188,17 +190,29 @@ public:
 
 	const bool* operator[](long y) const
 	{
-		return &bArrCurBlock[y * ulSideLength];//当前矩形基地址+边长大小*y求出对应行基地址
+		return &bArrCurBlock[y * ulSide];//当前矩形基地址+边长大小*y求出对应行基地址
 	}
 
-	void Draw(Draw &csDraw, const char *cBlock = "■") const
+	void Draw(Draw &csDraw, const char *cBlock = "□") const
 	{
-		for (long y = 0; y < ulSideLength; ++y)
+		for (long y = 0; y < GetSide(); ++y)
 		{
-			csDraw.SetCursorPos({lBlockX, lBlockY + y});//换行
-			for (long x = 0; x < ulSideLength; ++x)
+			csDraw.SetCursorPos({GetBlockX() * 2, GetBlockY() + y});//换行
+			if (GetBlockY() + y < 0)//判断Y是否在绘制边界外
 			{
-				if (bArrCurBlock[y * ulSideLength + x])
+				continue;
+			}
+
+			long x = 0;
+			if (GetBlockX() < 0)//判断X是否在绘制边界外
+			{
+				x = -GetBlockX();//如果是则让x + GetBlockX() == 0，也就是x = -GetBlockX()
+				csDraw.SetCursorPos({0, GetBlockY() + y});//设置初始位置为x == 0
+			}
+
+			for (; x < GetSide(); ++x)
+			{
+				if (bArrCurBlock[y * GetSide() + x])
 				{
 					csDraw.WriteBuffer(cBlock, 2);//画方块
 				}
@@ -258,8 +272,8 @@ public:
 	struct BlockData
 	{
 		bool *bArrBlock;
-		unsigned long ulSideLength;
-		unsigned long ulRotCount;
+		unsigned long ulSide;
+		unsigned long ulRotationForm;
 	};
 
 private:
@@ -346,5 +360,10 @@ public:
 	const BlockData &operator[](unsigned long ulBlockDataIndex)
 	{
 		return stBlockData[ulBlockDataIndex];
+	}
+
+	unsigned long GetBlockCount(void)
+	{
+		return 7;
 	}
 };

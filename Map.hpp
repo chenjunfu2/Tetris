@@ -51,12 +51,12 @@ public:
 	}
 
 
-	long GetHigh(void)
+	long GetHigh(void) const
 	{
 		return 20;
 	}
 
-	long GetWidth(void)
+	long GetWidth(void) const
 	{
 		return 10;
 	}
@@ -87,22 +87,40 @@ public:
 		return lMapY;
 	}
 
-	void Draw(Draw &csDraw, const char *cBlock = "¡ö", const char *cBlank = "  ")
+	void Draw(Draw &csDraw, const char *cBlock = "¡õ", const char *cBorder = "¡ö") const
 	{
-		for (long y = 0; y < 4; ++y)
+		//»­Íâ±ß¿ò
+		csDraw.SetCursorPos({GetMapX() - 1, GetMapY() - 1});
+		for (long i = 0; i < GetWidth() + 2; ++i)
 		{
-			csDraw.SetCursorPos({lMapX, lMapY + y});
-			for (long x = 0; x < 4; ++x)
+			csDraw.WriteBuffer(cBorder, 2);
+		}
+
+		for (long y = 0; y < GetHigh(); ++y)
+		{
+			csDraw.SetCursorPos({GetMapX() - 1, GetMapY() + y});
+			csDraw.WriteBuffer(cBorder, 2);//»­Íâ±ß¿ò
+
+			for (long x = 0; x < GetWidth(); ++x)
 			{
 				if (bMap[y][x])
 				{
-					csDraw.WriteBuffer(cBlock, 2);
+					csDraw.WriteBuffer(cBlock, 2);//»­·½¿é
 				}
 				else
 				{
-					csDraw.WriteBuffer(cBlank, 2);
+					csDraw.MoveCursorPos({2, 0});//Ìø¿Õ°×
 				}
 			}
+
+			csDraw.WriteBuffer(cBorder, 2);//»­Íâ±ß¿ò
+		}
+
+		//»­Íâ±ß¿ò
+		csDraw.SetCursorPos({GetMapX() - 1, GetMapY() + GetHigh()});
+		for (long i = 0; i < GetWidth() + 2; ++i)
+		{
+			csDraw.WriteBuffer(cBorder, 2);
 		}
 	}
 
