@@ -311,7 +311,7 @@ public:
 		//绘制得分
 		char cScore[32];
 		int iScoreStrLen = sprintf_s(cScore, "分 数: %ld", ulScore);
-		csDraw.SetCursorPos({csMap.GetMapX() + (csMap.GetWidth() + 1) * 2, 0});
+		csDraw.SetCursorPos({csMap.GetMapX() + (csMap.GetWidth() + 1) * 2 + 1, 0});
 		csDraw.WriteBuffer(cScore, iScoreStrLen);
 
 		csBlock.Draw(csDraw, cBlock);

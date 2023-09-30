@@ -104,6 +104,8 @@ public:
 		return *this;
 	}
 
+	Draw &operator=(Draw &) = default;
+
 	HANDLE GetConsole(void)
 	{
 		return hConsole;
@@ -127,9 +129,9 @@ public:
 	DWORD ClearBuffer(void)
 	{
 		DWORD dwWrittenLen;
-		CONSOLE_SCREEN_BUFFER_INFO stConsoleInfo;
+		CONSOLE_SCREEN_BUFFER_INFOEX stConsoleInfo = {.cbSize = sizeof(stConsoleInfo)};
 		
-		if (!GetConsoleScreenBufferInfo(hConsole, &stConsoleInfo) ||
+		if (!GetConsoleScreenBufferInfoEx(hConsole, &stConsoleInfo) ||
 			!FillConsoleOutputAttribute(hConsole, 0, stConsoleInfo.dwSize.X * stConsoleInfo.dwSize.Y, COORD{0, 0}, &dwWrittenLen))
 		{
 			return 0;
@@ -215,6 +217,7 @@ public:
 	{
 		ulCurrent = 0;
 		csOldBuf = GetStdHandle(STD_OUTPUT_HANDLE);//保存当前控制台初始句柄
+
 		for (long i = 0; i < lBufferNum; ++i)
 		{
 			HANDLE hNewConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
@@ -258,7 +261,7 @@ public:
 
 	void BegPrint(void)
 	{
-		csBuffer[ulCurrent].ClearBuffer();//清理缓冲区
+		csBuffer[ulCurrent].ClearBuffer();//清理缓冲区准备绘制
 	}
 
 	void EndPrint(void)
