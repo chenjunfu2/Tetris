@@ -129,9 +129,9 @@ public:
 	DWORD ClearBuffer(void)
 	{
 		DWORD dwWrittenLen;
-		CONSOLE_SCREEN_BUFFER_INFOEX stConsoleInfo = {.cbSize = sizeof(stConsoleInfo)};
+		CONSOLE_SCREEN_BUFFER_INFO stConsoleInfo;
 		
-		if (!GetConsoleScreenBufferInfoEx(hConsole, &stConsoleInfo) ||
+		if (!GetConsoleScreenBufferInfo(hConsole, &stConsoleInfo) ||
 			!FillConsoleOutputAttribute(hConsole, 0, stConsoleInfo.dwSize.X * stConsoleInfo.dwSize.Y, COORD{0, 0}, &dwWrittenLen))
 		{
 			return 0;
